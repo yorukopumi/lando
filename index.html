@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ระบบบันทึกข้อมูลการยืม–คืนอุปกรณ์</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Google Fonts: Kanit -->
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              green: '#2E7D32',      /* เขียวหลัก */
+              lightGreen: '#E8F5E9', /* เขียวอ่อน */
+              darkGreen: '#1B5E20',  /* เขียวเข้ม */
+              yellow: '#FBC02D',     /* เหลืองหลัก */
+              lightYellow: '#FFFDE7',/* เหลืองอ่อน */
+              accentYellow: '#F57F17'/* เหลืองเข้ม */
+            }
+          },
+          fontFamily: {
+            kanit: ['Kanit', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Kanit', sans-serif;
+      background-color: #f4f6f8;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-800 pb-10">
+
+  <!-- Header Banner -->
+  <header class="bg-gradient-to-r from-brand-darkGreen via-brand-green to-emerald-600 text-white shadow-lg">
+    <div class="max-w-6xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-brand-yellow text-brand-darkGreen p-3 rounded-2xl shadow-md">
+          <i class="fa-solid fa-box-archive text-3xl"></i>
+        </div>
+        <div>
+          <h1 class="text-2xl sm:text-3xl font-bold tracking-wide">ระบบบันทึกข้อมูลการยืม–คืนอุปกรณ์</h1>
+          <p class="text-brand-lightGreen text-sm">จัดการการยืมและคืนอุปกรณ์ได้อย่างสะดวกและรวดเร็ว</p>
+        </div>
+      </div>
+      <div class="bg-white/10 backdrop-blur-md border border-white/20 px-4 py-2 rounded-xl flex items-center gap-2 text-brand-lightYellow">
+        <i class="fa-solid fa-sheet-plastic text-brand-yellow text-xl"></i>
+        <span class="text-xs sm:text-sm">แผ่นงาน: <b>lan</b></span>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-6xl mx-auto px-4 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+    <!-- ฟอร์มบันทึกการยืม (ฝั่งซ้าย) -->
+    <section class="lg:col-span-5 bg-white rounded-2xl shadow-md border border-emerald-100 overflow-hidden">
+      <div class="bg-brand-lightGreen border-b border-emerald-100 px-6 py-4 flex items-center justify-between">
+        <h2 class="text-lg font-bold text-brand-darkGreen flex items-center gap-2">
+          <i class="fa-solid fa-pen-to-square text-brand-yellow"></i> บันทึกการยืมอุปกรณ์
+        </h2>
+        <span class="text-xs bg-brand-yellow/30 text-brand-darkGreen font-semibold px-2.5 py-1 rounded-full">ฟอร์มกรอกข้อมูล</span>
+      </div>
+
+      <form id="borrowForm" class="p-6 space-y-4">
+        <!-- ชื่อผู้ยืม -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            <i class="fa-solid fa-user text-brand-green mr-1"></i> ชื่อผู้ยืม <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="borrowerName" name="borrowerName" required placeholder="นายสมชาย ใจดี"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none transition">
+        </div>
+
+        <!-- รหัสนักเรียน -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            <i class="fa-solid fa-id-card text-brand-green mr-1"></i> รหัสนักเรียน <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="studentId" name="studentId" required placeholder="66100123"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none transition">
+        </div>
+
+        <!-- รายการอุปกรณ์ -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            <i class="fa-solid fa-screwdriver-wrench text-brand-green mr-1"></i> รายการอุปกรณ์ <span class="text-red-500">*</span>
+          </label>
+          <input type="text" id="itemList" name="itemList" required placeholder="โปรเจคเตอร์ / สายนพ / สาย HDMI"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none transition">
+        </div>
+
+        <!-- จำนวน และ วันที่ยืม -->
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">
+              <i class="fa-solid fa-hashtag text-brand-green mr-1"></i> จำนวน <span class="text-red-500">*</span>
+            </label>
+            <input type="number" id="quantity" name="quantity" min="1" value="1" required
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none transition">
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-slate-700 mb-1">
+              <i class="fa-solid fa-calendar-days text-brand-green mr-1"></i> วันที่ยืม
+            </label>
+            <input type="date" id="borrowDate" name="borrowDate" required
+              class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none transition">
+          </div>
+        </div>
+
+        <!-- สถานะการคืน -->
+        <div>
+          <label class="block text-sm font-medium text-slate-700 mb-1">
+            <i class="fa-solid fa-clock text-brand-green mr-1"></i> สถานะการคืน
+          </label>
+          <select id="status" name="status"
+            class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-green focus:border-brand-green outline-none transition bg-white">
+            <option value="ยังไม่คืน" selected>ยังไม่คืน</option>
+            <option value="คืนแล้ว">คืนแล้ว</option>
+          </select>
+        </div>
+
+        <!-- ปุ่มกดบันทึก -->
+        <button type="submit" id="btnSubmit"
+          class="w-full mt-2 bg-gradient-to-r from-brand-yellow to-amber-500 hover:from-amber-500 hover:to-brand-yellow text-slate-900 font-bold py-3 px-6 rounded-xl shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2">
+          <i class="fa-solid fa-paper-plane text-slate-900"></i> บันทึกข้อมูล
+        </button>
+      </form>
+    </section>
+
+    <!-- ตารางแสดงรายการ (ฝั่งขวา) -->
+    <section class="lg:col-span-7 bg-white rounded-2xl shadow-md border border-emerald-100 overflow-hidden flex flex-col">
+      <div class="bg-brand-lightGreen border-b border-emerald-100 px-6 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <h2 class="text-lg font-bold text-brand-darkGreen flex items-center gap-2">
+          <i class="fa-solid fa-list-check text-brand-green"></i> รายการยืม–คืนอุปกรณ์ทั้งหมด
+        </h2>
+        <button onclick="loadData()" class="self-start sm:self-auto text-xs bg-white text-brand-darkGreen hover:bg-brand-green hover:text-white border border-brand-green px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-rotate"></i> รีเฟรชข้อมูล
+        </button>
+      </div>
+
+      <!-- ค้นหา -->
+      <div class="p-4 border-b border-slate-100 bg-slate-50/50">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400"></i>
+          <input type="text" id="searchInput" onkeyup="filterTable()" placeholder="ค้นหาชื่อผู้ยืม, รหัสนักเรียน หรืออุปกรณ์..."
+            class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 focus:ring-2 focus:ring-brand-green outline-none text-sm bg-white">
+        </div>
+      </div>
+
+      <!-- ตาราง Data -->
+      <div class="overflow-x-auto flex-1">
+        <table class="w-full text-left text-sm text-slate-600">
+          <thead class="bg-slate-100 text-slate-700 font-semibold uppercase text-xs">
+            <tr>
+              <th class="py-3 px-4">ผู้ยืม / รหัส</th>
+              <th class="py-3 px-4">รายการอุปกรณ์</th>
+              <th class="py-3 px-4 text-center">จำนวน</th>
+              <th class="py-3 px-4">วันที่ยืม</th>
+              <th class="py-3 px-4 text-center">สถานะ</th>
+              <th class="py-3 px-4 text-center">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody" class="divide-y divide-slate-100">
+            <tr>
+              <td colspan="6" class="text-center py-8 text-slate-400">
+                <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-green mb-2"></i>
+                <p>กำลังโหลดข้อมูล...</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Script การทำงาน -->
+  <script>
+    // URL Web App
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzWu_pINE4s8UpyOS5FR6aEiQVr8rol-Zy1GqtcFTuAB0VV_ItywICM1eHyFGFBAPmQpg/exec";
+
+    let allRecords = [];
+
+    // กำหนดวันที่ปัจจุบันในฟอร์ม
+    document.addEventListener("DOMContentLoaded", function() {
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById("borrowDate").value = today;
+      loadData();
+    });
+
+    // ฟังก์ชั่นดึงข้อมูลจาก Google Sheet
+    function loadData() {
+      const tableBody = document.getElementById("tableBody");
+      tableBody.innerHTML = `
+        <tr>
+          <td colspan="6" class="text-center py-8 text-slate-400">
+            <i class="fa-solid fa-spinner fa-spin text-2xl text-brand-green mb-2"></i>
+            <p>กำลังโหลดข้อมูล...</p>
+          </td>
+        </tr>
+      `;
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(renderTable)
+          .withFailureHandler(handleError)
+          .getRecords();
+      } else {
+        // กรณีทดสอบผ่าน Fetch API
+        fetch(WEB_APP_URL + "?action=getData")
+          .then(res => res.json())
+          .then(response => {
+            if (response.result === "success") {
+              renderTable(response.data);
+            }
+          })
+          .catch(err => handleError(err));
+      }
+    }
+
+    // วาดตารางข้อมูล
+    function renderTable(data) {
+      allRecords = data || [];
+      const tableBody = document.getElementById("tableBody");
+
+      if (allRecords.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="6" class="text-center py-8 text-slate-400">
+              <i class="fa-regular fa-folder-open text-3xl mb-2"></i>
+              <p>ยังไม่มีข้อมูลการยืมอุปกรณ์</p>
+            </td>
+          </tr>
+        `;
+        return;
+      }
+
+      tableBody.innerHTML = "";
+      allRecords.forEach(item => {
+        const isReturned = item.status === "คืนแล้ว";
+        const statusBadge = isReturned
+          ? `<span class="bg-emerald-100 text-emerald-800 text-xs font-medium px-2.5 py-1 rounded-full flex items-center justify-center gap-1"><i class="fa-solid fa-circle-check"></i> คืนแล้ว</span>`
+          : `<span class="bg-amber-100 text-amber-800 text-xs font-medium px-2.5 py-1 rounded-full flex items-center justify-center gap-1"><i class="fa-solid fa-hourglass-half"></i> ยังไม่คืน</span>`;
+
+        const actionBtn = isReturned
+          ? `<span class="text-xs text-slate-400">-</span>`
+          : `<button onclick="updateReturnStatus(${item.rowIndex})" class="bg-brand-yellow hover:bg-amber-400 text-slate-900 text-xs font-semibold px-2.5 py-1 rounded-lg transition shadow-sm flex items-center gap-1 mx-auto">
+              <i class="fa-solid fa-rotate-left"></i> คืนอุปกรณ์
+             </button>`;
+
+        const tr = document.createElement("tr");
+        tr.className = "hover:bg-slate-50 transition";
+        tr.innerHTML = `
+          <td class="py-3 px-4">
+            <div class="font-medium text-slate-800">${escapeHtml(item.borrowerName)}</div>
+            <div class="text-xs text-slate-400">รหัส: ${escapeHtml(item.studentId)}</div>
+          </td>
+          <td class="py-3 px-4 font-medium text-slate-700">${escapeHtml(item.itemList)}</td>
+          <td class="py-3 px-4 text-center font-semibold text-brand-green">${item.quantity}</td>
+          <td class="py-3 px-4 text-xs text-slate-500">${item.borrowDate}</td>
+          <td class="py-3 px-4 text-center">${statusBadge}</td>
+          <td class="py-3 px-4 text-center">${actionBtn}</td>
+        `;
+        tableBody.appendChild(tr);
+      });
+    }
+
+    // ฟังก์ชั่นค้นหาข้อมูลในตาราง
+    function filterTable() {
+      const keyword = document.getElementById("searchInput").value.toLowerCase();
+      const filtered = allRecords.filter(r => 
+        r.borrowerName.toLowerCase().includes(keyword) ||
+        r.studentId.toLowerCase().includes(keyword) ||
+        r.itemList.toLowerCase().includes(keyword)
+      );
+      renderTable(filtered);
+    }
+
+    // Submit ฟอร์มส่งข้อมูลไปยัง Action URL
+    document.getElementById("borrowForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+
+      const btnSubmit = document.getElementById("btnSubmit");
+      btnSubmit.disabled = true;
+      btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> กำลังบันทึก...`;
+
+      const formData = {
+        borrowerName: document.getElementById("borrowerName").value,
+        studentId: document.getElementById("studentId").value,
+        itemList: document.getElementById("itemList").value,
+        quantity: document.getElementById("quantity").value,
+        borrowDate: document.getElementById("borrowDate").value,
+        status: document.getElementById("status").value
+      };
+
+      // บันทึกผ่าน fetch ไปยัง Web App Action URL
+      fetch(WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData)
+      })
+      .then(() => {
+        Swal.fire({
+          icon: 'success',
+          title: 'บันทึกสำเร็จ!',
+          text: 'ข้อมูลการยืมได้รับการบันทึกลง Google Sheet แล้ว',
+          confirmButtonColor: '#2E7D32'
+        });
+
+        // รีเซ็ตฟอร์ม
+        document.getElementById("borrowForm").reset();
+        document.getElementById("borrowDate").value = new Date().toISOString().split('T')[0];
+        document.getElementById("status").value = "ยังไม่คืน";
+
+        // โหลดข้อมูลใหม่
+        setTimeout(loadData, 1000);
+      })
+      .catch(err => {
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: err.toString(),
+          confirmButtonColor: '#2E7D32'
+        });
+      })
+      .finally(() => {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = `<i class="fa-solid fa-paper-plane text-slate-900"></i> บันทึกข้อมูล`;
+      });
+    });
+
+    // ฟังก์ชั่นอัปเดตสถานะเป็น "คืนแล้ว"
+    function updateReturnStatus(rowIndex) {
+      Swal.fire({
+        title: 'ยืนยันการรับคืนอุปกรณ์?',
+        text: "ต้องการเปลี่ยนสถานะรายการนี้เป็น 'คืนแล้ว' หรือไม่?",
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#2E7D32',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'ใช่, คืนแล้ว',
+        cancelButtonText: 'ยกเลิก'
+      }).then((result) => {
+        if (result.isConfirmed) {
+          fetch(WEB_APP_URL, {
+            method: "POST",
+            mode: "no-cors",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "updateStatus",
+              rowIndex: rowIndex,
+              status: "คืนแล้ว"
+            })
+          })
+          .then(() => {
+            Swal.fire({
+              icon: 'success',
+              title: 'อัปเดตเรียบร้อย!',
+              text: 'เปลี่ยนสถานะเป็น คืนแล้ว สำเร็จ',
+              timer: 1500,
+              showConfirmButton: false
+            });
+            setTimeout(loadData, 1000);
+          });
+        }
+      });
+    }
+
+    function handleError(error) {
+      console.error(error);
+      Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาดในการดึงข้อมูล',
+        text: 'กรุณาตรวจสอบการตั้งค่าสิทธิ์ของ Google Apps Script',
+        confirmButtonColor: '#2E7D32'
+      });
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
